@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const Post = require('./post');
 
 const UserSchema = new mongoose.Schema({
     name: {
@@ -54,7 +57,11 @@ const UserSchema = new mongoose.Schema({
     }
 });
 
-const User = mongoose.model('User', UserSchema);
+UserSchema.virtual('posts', {
+    ref: 'Post',
+    localField: '_id',
+    foreignField: 'author'
+});
 
 UserSchema.methods.newAuthToken = async function () {
     const user = this;
@@ -78,10 +85,6 @@ UserSchema.pre('save', async function(next) {
     next();
 });
 
-UserSchema.virtual('posts', {
-    ref: 'Post',
-    localField: '_id',
-    foreignField: 'author'
-});
+const User = mongoose.model('User', UserSchema);
 
 module.exports = User;
